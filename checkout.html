@@ -1,0 +1,109 @@
+<html>
+<head>
+    <title>Culqi Checout</title>
+</head>
+<body>
+<h1>Culqi pagos</h1>
+<button id="btn_pagar">Pagar</button>
+<p id="status">Pendiente de pago</p>
+
+
+<script src="https://checkout.culqi.com/js/v4"></script>
+<script>
+    Culqi.publicKey = 'pk_test_048a5fcea5908de9';  // Ingresar Public API Key
+    Culqi.settings({
+        title: 'Aclara Lab',  // Nombre de tu comercio
+        currency: 'PEN',  // Este parámetro es requerido para realizar pagos yape
+        amount: 1500,  // Monto a cobrar en céntimos de soles
+        order: 'ord_live_0CjjdWhFpEAZlxlz', // Para habilitar pagoEfectivo, billeteras y Cuotéalo
+    });
+    Culqi.options({
+        lang: "auto",
+        installments: false, // Habilitar o deshabilitar el campo de cuotas
+        paymentMethods: {
+            tarjeta: true,
+            yape: true,
+            bancaMovil: true,
+            agente: true,
+            billetera: true,
+            cuotealo: true,
+        },
+        style: {
+            logo: 'https://aclaralab.com/favicon.ico',  // El logo de tu empresa
+            bannerColor: '', // Color del banner en hexadecimal
+            buttonBackground: '', // color del botón de batan en hexadecimal
+            menuColor: '', // color de las letras del menú cuando se activan las opciones en hexadecimal
+            linksColor: '', // color de las letras de los links en hexadecimal
+            buttonText: '', // texto que tomará el botón
+            buttonTextColor: '', // hexadecimal
+            priceColor: '' // hexadecimal
+        }
+    });
+    const btn_pagar = document.getElementById('btn_pagar');
+
+    btn_pagar.addEventListener('click', function (e) {
+        // Abre el formulario de pago al hacer click en el botón de id 'btn_pagar'
+        Culqi.open();
+        e.preventDefault();
+    })
+
+    function send_token_to_backend(token) {
+
+        const data = {
+            token: token
+        };
+
+        // Fetch options for the POST request
+        const fetchOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        };
+
+        url = "" // URL del backend para recibir token
+
+        fetch(url, fetchOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    // No se pudo enviar el backend y no se hizo el cargo
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Sí se realizó el cargo
+                console.log("Se realizó el cargo");
+            })
+            .catch(error => {
+                // No se realizó el cargo
+                console.error('Fetch error:', error);
+            });
+    }
+
+    function culqi() {
+        if (Culqi.token) {  // ¡Objeto Token creado exitosamente!
+            const token = Culqi.token.id;
+            console.log('Se ha creado un Token: ', token);
+
+            // Se cierra la pantalla de culqi
+            Culqi.close()
+
+            // Se envía el token mediante fetch
+
+        } else if (Culqi.order) {  // ¡Objeto Order creado exitosamente!
+            const order = Culqi.order;
+            console.log('Se ha creado el objeto Order: ', order);
+
+            // La orden de pago se ha creado y se está a la espera
+
+
+        } else {
+            // Mostramos JSON de objeto error en consola
+            console.log('Error : ',Culqi.error);
+        }
+    };
+</script>
+</body>
+</html>
